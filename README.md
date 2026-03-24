@@ -32,10 +32,12 @@ cd web-base-calculator
 pip install -r requirements.txt
 
 # 3. Start the app
-python app.py
+python3 app.py
 ```
 
-Open your browser at **http://localhost:5000**
+Open your browser at **http://localhost:8080**
+
+**To stop the server:** press `Ctrl + C` in the terminal
 
 ---
 
@@ -52,10 +54,12 @@ cd web-base-calculator
 docker build -t web-base-calculator .
 
 # 3. Run the container
-docker run -p 5000:5000 web-base-calculator
+docker run -p 8080:8080 web-base-calculator
 ```
 
-Open your browser at **http://localhost:5000**
+Open your browser at **http://localhost:8080**
+
+**To stop the container:** press `Ctrl + C` in the terminal
 
 ---
 
@@ -67,7 +71,7 @@ Open your browser at **http://localhost:5000**
 2. Click **"New Web Service"** → connect your GitHub repo
 3. Set the following:
    - **Build Command:** `pip install -r requirements.txt`
-   - **Start Command:** `python app.py`
+   - **Start Command:** `python3 app.py`
 4. Click **"Create Web Service"**
 
 ---
