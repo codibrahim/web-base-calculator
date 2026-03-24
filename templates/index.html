@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Web Calculator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .calculator {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 24px;
+      width: 320px;
+      box-shadow: 0 25px 45px rgba(0, 0, 0, 0.4);
+    }
+
+    .display {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      text-align: right;
+      min-height: 90px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    .display .expression {
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 14px;
+      min-height: 20px;
+      margin-bottom: 6px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .display .result {
+      color: #ffffff;
+      font-size: 36px;
+      font-weight: 300;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    button {
+      padding: 18px;
+      border: none;
+      border-radius: 14px;
+      font-size: 18px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    button:active {
+      transform: scale(0.93);
+    }
+
+    /* Number buttons */
+    .btn-number {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+    }
+
+    .btn-number:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Operator buttons */
+    .btn-operator {
+      background: rgba(82, 130, 255, 0.3);
+      color: #7eb3ff;
+    }
+
+    .btn-operator:hover {
+      background: rgba(82, 130, 255, 0.5);
+    }
+
+    /* Equals button */
+    .btn-equals {
+      background: linear-gradient(135deg, #5282ff, #8b5cf6);
+      color: #ffffff;
+    }
+
+    .btn-equals:hover {
+      background: linear-gradient(135deg, #6b95ff, #9f6fff);
+    }
+
+    /* Clear / special buttons */
+    .btn-special {
+      background: rgba(255, 80, 80, 0.25);
+      color: #ff8080;
+    }
+
+    .btn-special:hover {
+      background: rgba(255, 80, 80, 0.4);
+    }
+
+    /* Zero button spans 2 columns */
+    .btn-zero {
+      grid-column: span 2;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="display">
+      <div class="expression" id="expression"></div>
+      <div class="result" id="result">0</div>
+    </div>
+
+    <div class="buttons">
+      <button class="btn-special" onclick="clearAll()">AC</button>
+      <button class="btn-special" onclick="deleteLast()">⌫</button>
+      <button class="btn-operator" onclick="appendToExpression('%')">%</button>
+      <button class="btn-operator" onclick="appendToExpression('/')">÷</button>
+
+      <button class="btn-number" onclick="appendToExpression('7')">7</button>
+      <button class="btn-number" onclick="appendToExpression('8')">8</button>
+      <button class="btn-number" onclick="appendToExpression('9')">9</button>
+      <button class="btn-operator" onclick="appendToExpression('*')">×</button>
+
+      <button class="btn-number" onclick="appendToExpression('4')">4</button>
+      <button class="btn-number" onclick="appendToExpression('5')">5</button>
+      <button class="btn-number" onclick="appendToExpression('6')">6</button>
+      <button class="btn-operator" onclick="appendToExpression('-')">−</button>
+
+      <button class="btn-number" onclick="appendToExpression('1')">1</button>
+      <button class="btn-number" onclick="appendToExpression('2')">2</button>
+      <button class="btn-number" onclick="appendToExpression('3')">3</button>
+      <button class="btn-operator" onclick="appendToExpression('+')">+</button>
+
+      <button class="btn-number btn-zero" onclick="appendToExpression('0')">0</button>
+      <button class="btn-number" onclick="appendToExpression('.')">.</button>
+      <button class="btn-equals" onclick="calculate()">=</button>
+    </div>
+  </div>
+
+  <script>
+    let expression = "";
+
+    function appendToExpression(value) {
+      expression += value;
+      document.getElementById("expression").textContent = expression;
+      document.getElementById("result").textContent = expression;
+    }
+
+    function clearAll() {
+      expression = "";
+      document.getElementById("expression").textContent = "";
+      document.getElementById("result").textContent = "0";
+    }
+
+    function deleteLast() {
+      expression = expression.slice(0, -1);
+      document.getElementById("expression").textContent = expression;
+      document.getElementById("result").textContent = expression || "0";
+    }
+
+    async function calculate() {
+      if (!expression) return;
+
+      const response = await fetch("/calculate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ expression })
+      });
+
+      const data = await response.json();
+      document.getElementById("expression").textContent = expression + " =";
+      document.getElementById("result").textContent = data.result;
+
+      // If no error, set result as new expression base
+      if (!data.result.startsWith("Error")) {
+        expression = data.result;
+      }
+    }
+
+    // Keyboard support
+    document.addEventListener("keydown", (e) => {
+      if ("0123456789+-*/.%".includes(e.key)) appendToExpression(e.key);
+      else if (e.key === "Enter" || e.key === "=") calculate();
+      else if (e.key === "Backspace") deleteLast();
+      else if (e.key === "Escape") clearAll();
+    });
+  </script>
+</body>
+</html>
